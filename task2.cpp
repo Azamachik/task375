@@ -134,9 +134,7 @@ void divideMatrixByMax(double** matrix, int n, int m) {
         } 
     } 
 } 
-// Функция для отображения матрицы 
 void printMatrixPretty(double** matrix, int n, int m, ostream& out) { 
-    // Определение ширины столбца для выравнивания элементов 
     int max_width {0}; 
     for (int i {0}; i < n; i++) { 
         for (int j {0}; j < m; j++) { 
