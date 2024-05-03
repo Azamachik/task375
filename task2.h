@@ -4,8 +4,8 @@
 #include <limits>
 #include <regex>
 #include <iostream> 
-#include <cstdlib> // для использования функции rand() 
-#include <iomanip> // для использования std::setw 
+#include <cstdlib> 
+#include <iomanip> 
 #include <fstream>
 using namespace std;
 
