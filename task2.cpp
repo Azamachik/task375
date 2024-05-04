@@ -4,7 +4,12 @@
 namespace task2 {
 bool is_number(string input) {
 	smatch result;
-	regex regular("^(-??[0-9]+?.??[0-9]*?)+?(-??[0-9]+?.??[0-9]*?)$");
+	regex regular("-??[0-9]+?[.]??[0-9]*?");
+	return regex_match(input, result, regular);
+}
+bool is_correct_row(string input) {
+	smatch result;
+	const regex regular("^(-??[0-9]+?.??[0-9]*?)+?(-??[0-9]+?.??[0-9]*?)$");
 	return regex_match(input, result, regular);
 }
 bool is_natural_number(string input) {
@@ -30,46 +35,79 @@ double parseDouble(const string& s) {
 	return result;
 }
 void readMatrixFromFile(double** matrix, int n, int m, bool& is_valid_matrix) {
-	ifstream file(constants::task375Input);
-	if (!file.is_open()) {
-		cerr << "Unable to open file\n";
-		exit(EXIT_FAILURE);
-	}
-	vector<vector<double>> numbers;
-	string line;
-	while (!file.eof()) {
-		getline(file, line);
-		if (is_number(line)) {
-			if (m - 1 != count(line.begin(), line.end(), ' ')) {
-				cout << "Ooops, an odd column in the matrix!\n";
+    ifstream file(constants::task375Input);
+    if (!file.is_open()) {
+        cerr << "Unable to open file\n";
+        exit(EXIT_FAILURE);
+    }
+    
+    double** numbers  {new double*[n]};
+    for (int i {0}; i < n; i++) {
+        numbers[i] = new double[m];
+    }
+    
+    string line;
+    int row_index {0}, count_row {0};
+    while (getline(file, line)) {
+        
+        if (is_correct_row(line)) {
+            if (m - 1 != count(line.begin(), line.end(), ' ')) {
+                cout << "Ooops, an odd column in the matrix!\n";
                 is_valid_matrix = false;
-				return;
-			}
-		}
-		else {cout << "Please, fill correct the matrix. Enter only numbers separated by one space on each row!\n";
+                return;
+            }
+        }
+        else {
+            cout << "Please, fill correct the matrix. Enter only numbers separated by one space on each row!\n";
             is_valid_matrix = false;
-            return; }
-		stringstream ss(line);
-		string token;
-		vector<double> row;
-		while (getline(ss, token, ' ')) {
-			row.push_back(parseDouble(token));
-		}
-		numbers.push_back(row);
-	}
+            return;
+        }
+        count_row++;
+        if (count_row > n) {
+                cout << "Ooops, an odd row in the matrix!\n";
+                is_valid_matrix = false;
+                for (int i {0}; i < n; i++) {
+                    delete[] numbers[i];
+                    numbers[i] = nullptr;
+                }
+                delete[] numbers;
+                numbers = nullptr;
+                return;
+            }
+        stringstream ss(line);
+        string token;
+        int col_index {0};
+        while (getline(ss, token, ' ')) {
+            numbers[row_index][col_index] = parseDouble(token);
+            col_index++;
+        }
+        row_index++;
+        
+    }
+    
     double sum_of_elements {0};
-	for (int i {0}; i < numbers.size(); i++) {
-		for (int j {0}; j < numbers[i].size(); j++) {
-			matrix[i][j] = numbers[i][j];
+    for (int i {0}; i < n; i++) {
+        for (int j {0}; j < m; j++) {
+            matrix[i][j] = numbers[i][j];
             sum_of_elements += matrix[i][j];
-		}
-	}
+        }
+    }
+    
     if (sum_of_elements == 0) {
         cout << "Cannot divide by zero.\n";
         is_valid_matrix = false;
         return;
     }
+    
     file.close();
+    
+    for (int i {0}; i < n; i++) {
+        delete[] numbers[i];
+        numbers[i] = nullptr;
+    }
+    delete[] numbers;
+    numbers = nullptr;
+
 }
 void deleteMatrix(double** matrix, int n) { 
     for (int i {0}; i < n; i++) { 
@@ -144,7 +182,6 @@ void printMatrixPretty(double** matrix, int n, int m, ostream& out) {
             } 
         } 
     } 
-    // Вывод матрицы с выравниванием элементов 
     for (int i {0}; i < n; i++) { 
         for (int j {0}; j < m; j++) { 
             out << setw(max_width) << matrix[i][j] << " "; 
